@@ -5,6 +5,26 @@ services:
     image: "redis:alpine"
     ports:
       - "6379:6379"
+  redis_with_password:
+    image: "redis:alpine"
+    volumes:
+      - ./acceptance-tests/redis-confs:/usr/local/etc/redis
+    ports:
+      - target: 6380
+        published: 6380
+        protocol: tcp
+        mode: host
+    entrypoint: ["/usr/local/bin/redis-server", "/usr/local/etc/redis/with_password.conf"]
+  redis_with_username_and_password:
+    image: "redis:alpine"
+    volumes:
+      - ./acceptance-tests/redis-confs:/usr/local/etc/redis
+    ports:
+      - target: 6381
+        published: 6381
+        protocol: tcp
+        mode: host
+    entrypoint: ["/usr/local/bin/redis-server", "/usr/local/etc/redis/with_username_and_password.conf"]
   tests:
     image: "alpine:latest"
     volumes:
@@ -13,5 +33,7 @@ services:
       - ./bin/redis-dump-go:/redis-dump-go
     depends_on:
       - "redis"
+      - "redis_with_password"
+      - "redis_with_username_and_password"
     working_dir: /acceptance-tests
     entrypoint: ["/acceptance-tests/entrypoint.sh"]
